@@ -1,0 +1,19 @@
+{
+    "name": "teleprompter",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev:web": "npm run dev -w apps/web",
+        "dev:signaling": "npm run dev -w apps/signaling",
+        "test": "npm run test -w apps/signaling -w packages/shared",
+        "build": "npm run build -w apps/web",
+        "typecheck": "tsc -p apps/signaling --noEmit && tsc -p apps/web --noEmit"
+    },
+    "devDependencies": {
+        "@types/node": "^26.6.5",
+        "typescript": "^7.0.2"
+    }
+}
