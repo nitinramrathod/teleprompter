@@ -20,7 +20,7 @@ export default function Controller() {
     const to = setTimeout(() => { setErr("Connection timed out."); setStatus("Idle"); cleanup.current(); }, 20000);
     cleanup.current = () => { clearTimeout(to); dc.current?.close(); pc.close(); ws.close(); dc.current = null; };
     ws.onopen = () => ws.send(JSON.stringify({ type: "join", code }));
-    ws.onerror = () => { setErr("Cannot reach signaling server."); setStatus("Idle"); };
+    ws.onerror = () => { setErr(`Cannot reach ${signalingUrl()}`); setStatus("Idle"); };
     pc.onicecandidate = (e) => e.candidate && ws.send(JSON.stringify({ type: "signal", data: { candidate: e.candidate } }));
     pc.ondatachannel = (e) => {
       const ch = e.channel; dc.current = ch;
