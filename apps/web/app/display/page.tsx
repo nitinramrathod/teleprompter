@@ -13,6 +13,7 @@ export default function Display() {
   const stRef = useRef(st); stRef.current = st;
   const box = useRef<HTMLDivElement>(null); const dc = useRef<RTCDataChannel | null>(null);
   const dir = useRef(0); const [reading, setReading] = useState(false);
+  const buf = useRef<{ id: string; parts: (string | undefined)[]; got: number } | null>(null);
 
   useEffect(() => { setText(localStorage.getItem("tp-script") ?? ""); }, []);
   useEffect(() => { localStorage.setItem("tp-script", text); }, [text]);
@@ -50,6 +51,18 @@ export default function Display() {
         case "GO_TO_TOP": if (e) e.scrollTop = 0; return;
         case "GO_TO_BOTTOM": if (e) e.scrollTop = e.scrollHeight; return;
         case "REQUEST_STATE": return push();
+        case "SCRIPT_CHUNK": {
+          if (c.i >= c.n) return;
+          let b = buf.current;
+          if (!b || b.id !== c.id) b = buf.current = { id: c.id, parts: new Array(c.n).fill(undefined), got: 0 };
+          if (b.parts[c.i] === undefined) { b.parts[c.i] = c.d; b.got++; }
+          if (b.got === c.n) {
+            setText(b.parts.join(""));
+            buf.current = null;
+            if (box.current) box.current.scrollTop = 0;
+          }
+          return;
+        }
       }
     };
     const setup = () => {

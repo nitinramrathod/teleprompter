@@ -9,9 +9,16 @@ const btn = { padding: "18px 12px", fontSize: 18, borderRadius: 12, border: 0, b
 
 export default function Controller() {
   const [code, setCode] = useState(""); const [err, setErr] = useState(""); const [status, setStatus] = useState("Idle");
+   const [draft, setDraft] = useState("");
   const [st, setSt] = useState<DisplayState | null>(null); const dc = useRef<RTCDataChannel | null>(null); const cleanup = useRef<() => void>(() => {});
   useEffect(() => () => cleanup.current(), []);
   const send = (c: Command) => dc.current?.readyState === "open" && dc.current.send(JSON.stringify(c));
+    const sendScript = () => {
+    const id = Math.random().toString(36).slice(2); // crypto.randomUUID needs HTTPS, so avoid it on LAN http
+    const parts = draft.match(/[\s\S]{1,3000}/g) ?? [""];
+    if (parts.length > 100) return setErr("Script too long (max about 300,000 characters).");
+    parts.forEach((d, i) => send({ t: "SCRIPT_CHUNK", id, i, n: parts.length, d }));
+  };
 
   const connect = () => {
     setErr(""); if (!isValidCode(code)) return setErr("Enter exactly 8 digits.");
@@ -60,5 +67,10 @@ export default function Controller() {
       <button style={btn} onClick={() => send({ t: "SET_MIRROR", h: !st.mirrorH, v: st.mirrorV })}>Mirror H</button>
       <button style={btn} onClick={() => send({ t: "SET_MIRROR", h: st.mirrorH, v: !st.mirrorV })}>Flip V</button>
       <button style={btn} onClick={() => send({ t: "SET_THEME", v: st.theme === "dark" ? "light" : "dark" })}>Theme</button></div>
+      <label>New script
+        <textarea value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Paste script here…" rows={6} style={{ width: "100%", fontSize: 16, padding: 8, userSelect: "text" }} />
+      </label>
+      <button style={btn} onClick={sendScript}>Send to display</button>
+      {err && <div role="alert" style={{ color: "#f87171" }}>{err}</div>}
   </main>;
 }

@@ -30,6 +30,13 @@ export const Command = z.discriminatedUnion("t", [
   z.object({ t: z.literal("SET_MIRROR"), h: z.boolean(), v: z.boolean() }),
   z.object({ t: z.literal("SET_THEME"), v: z.enum(["dark", "light"]) }),
   z.object({ t: z.literal("REQUEST_STATE") }),
+  z.object({
+    t: z.literal("SCRIPT_CHUNK"),
+    id: z.string().max(40),
+    i: z.number().int().min(0).max(99),
+    n: z.number().int().min(1).max(100),
+    d: z.string().max(4000),
+  }),
 ]);
 export type Command = z.infer<typeof Command>;
 
@@ -40,7 +47,8 @@ export const DisplayState = z.object({
 });
 export type DisplayState = z.infer<typeof DisplayState>;
 
-export const MAX_DC_BYTES = 4096;
+// export const MAX_DC_BYTES = 4096;
+export const MAX_DC_BYTES = 16384;
 export function parseCommand(raw: unknown): Command | null {
   if (typeof raw !== "string" || raw.length > MAX_DC_BYTES) return null;
   try { const r = Command.safeParse(JSON.parse(raw)); return r.success ? r.data : null; } catch { return null; }

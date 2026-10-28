@@ -11,7 +11,8 @@ describe("shared", () => {
     expect(parseCommand('{"t":"PLAY"}')).toEqual({ t: "PLAY" });
     expect(parseCommand('{"t":"SET_SPEED","v":999}')).toBeNull();
     expect(parseCommand("nope")).toBeNull();
-    expect(parseCommand("x".repeat(5000))).toBeNull();
+    // expect(parseCommand("x".repeat(5000))).toBeNull();
+    expect(parseCommand("x".repeat(20000))).toBeNull();
   });
   it("maps speed", () => expect(speedToPxPerSec(3)).toBe(120));
 });
